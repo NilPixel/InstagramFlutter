@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'insta_body_stateful.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'insta_stories.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class InstaHomeStateful extends StatefulWidget {
-  InstaHomeStateful({Key key}) : super(key: key);
+class InstaHome extends StatefulWidget {
+  InstaHome({Key key}) : super(key: key);
 
   @override
-  _InstaHomeStatefulState createState() => _InstaHomeStatefulState();
+  _InstaHomeState createState() => _InstaHomeState();
 }
 
-class _InstaHomeStatefulState extends State<InstaHomeStateful> {
+class _InstaHomeState extends State<InstaHome> {
   final topBar = new AppBar(
     backgroundColor: new Color(0xfff8faf8),
     centerTitle: true,
@@ -65,16 +65,16 @@ class _InstaHomeStatefulState extends State<InstaHomeStateful> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              new Container(
-                                height: 40.0,
-                                width: 40.0,
-                                decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: 
-                                      new NetworkImage(
-                                          "http://n.sinaimg.cn/tech/crawl/0/w400h400/20200422/de9a-isqivxf9857884.jpg")),
+                              new ClipOval(
+                                child: new CachedNetworkImage(
+                                  width: 40.0,
+                                  height: 40.0,
+                                  imageUrl:
+                                      "http://n.sinaimg.cn/tech/crawl/0/w400h400/20200422/de9a-isqivxf9857884.jpg",
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
                                 ),
                               ),
                               new SizedBox(
@@ -95,9 +95,13 @@ class _InstaHomeStatefulState extends State<InstaHomeStateful> {
                     ),
                     Flexible(
                       fit: FlexFit.loose,
-                      child: new Image.network(
-                        "https://images.pexels.com/photos/672657/pexels-photo-672657.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                      child: new CachedNetworkImage(
                         fit: BoxFit.cover,
+                        imageUrl:
+                            "https://images.pexels.com/photos/672657/pexels-photo-672657.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
                       ),
                     ),
                     Padding(
@@ -139,16 +143,17 @@ class _InstaHomeStatefulState extends State<InstaHomeStateful> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          new Container(
-                            height: 40.0,
-                            width: 40.0,
-                            decoration: new BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: new DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image: new NetworkImage(
-                                      "http://n.sinaimg.cn/tech/crawl/0/w400h400/20200422/de9a-isqivxf9857884.jpg")),
-                            ),
+                          new ClipOval(
+                            child: CachedNetworkImage(
+                                width: 40.0,
+                                height: 40.0,
+                                fit: BoxFit.fill,
+                                imageUrl:
+                                    "http://n.sinaimg.cn/tech/crawl/0/w400h400/20200422/de9a-isqivxf9857884.jpg",
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error)),
                           ),
                           new SizedBox(
                             width: 10.0,

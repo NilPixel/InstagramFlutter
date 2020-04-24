@@ -4,7 +4,7 @@ import '../insta_add.dart';
 import '../insta_like.dart';
 import '../insta_mine.dart';
 import '../insta_search.dart';
-import '../insta_home_stateful.dart';
+import '../insta_home.dart';
 
 class InstaTabbar extends StatefulWidget {
   InstaTabbar({Key key}) : super(key: key);
@@ -19,7 +19,7 @@ class _InstaTabbarState extends State<InstaTabbar> {
   _InstaTabbarState({this.currentIndex = 0});
 
   final List pages = [
-    InstaHomeStateful(),
+    InstaHome(),
     InstaSearchPage(),
     InstaAddPage(),
     InstaLikePage(),
