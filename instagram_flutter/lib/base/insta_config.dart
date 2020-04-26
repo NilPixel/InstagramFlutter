@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:instagram_flutter/tools/insta_app_tools.dart';
-import 'package:instagram_flutter/tools/insta_user_tools.dart';
+import 'package:instagram_flutter/utils/persistence/insta_app_tools.dart';
+import 'package:instagram_flutter/utils/persistence/insta_user_tools.dart';
 
 class AppConfig {
   static const baseUrl = 'http://chenliang.yishouhaoge.cn/';
