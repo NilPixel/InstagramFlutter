@@ -2,6 +2,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram_flutter/base/provide/insta_base_provide.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:instagram_flutter/base/insta_config.dart';
+import 'package:instagram_flutter/data/insta_song.dart';
+import 'package:instagram_flutter/utils/media/insta_player.dart';
+import 'package:instagram_flutter/model/insta_home_model.dart';
 
 class HomeProvide extends BaseProvide {
   // 页数
@@ -58,7 +61,7 @@ class HomeProvide extends BaseProvide {
       'orderkey': 'imgUrl',
       'sequence': true,
       'searchKey': '',
-      'userId': AppConfig.userTools.getUserId()
+      'userId': null
     };
     return _repo
         .getSongs(query)

@@ -6,15 +6,17 @@ import 'package:instagram_flutter/viewmodel/insta_main_provide.dart';
 import 'package:instagram_flutter/utils/media/insta_mutual.dart';
 import 'dart:math';
 import 'dart:async';
+import 'package:instagram_flutter/utils/common/insta_common.dart';
 
 class PlayerTools {
-  final stateSubject = new BehaviorSubject<AudioToolsState>.seeded(AudioToolsState.isStoped);
+  final stateSubject =
+      new BehaviorSubject<AudioToolsState>.seeded(AudioToolsState.isStoped);
   final progressSubject = new BehaviorSubject<int>.seeded(0);
   final timerDownSubject = new BehaviorSubject<String>.seeded('');
   final currentSongSubject = new BehaviorSubject<Song>.seeded(Song());
 
   // 工厂模式
-  factory PlayerTools() =>_getInstance();
+  factory PlayerTools() => _getInstance();
   static PlayerTools get instance => _getInstance();
   static PlayerTools _instance;
   static PlayerTools _getInstance() {
@@ -80,7 +82,6 @@ class PlayerTools {
 
   // 设置数据源
   setSongs([List<Song> songs, int index = 0]) {
-
     this.songArr.clear();
     this.songArr.addAll(songs);
 
@@ -101,13 +102,15 @@ class PlayerTools {
   /// 播放
   play(Song song) async {
     this.currentSong = song;
-    if (this.songArr.length == 0) { /// 可能是单曲
+    if (this.songArr.length == 0) {
+      /// 可能是单曲
       this.songArr = [song];
       this.currentPlayIndex = 0;
       MainProvide.instance.showMini = true;
     }
     this.appPlay(song);
   }
+
   appPlay(Song song) async {
     Song song_my = Song();
     song_my.songUrl = song.songUrl;
@@ -124,25 +127,30 @@ class PlayerTools {
     song_my.songUrl = song_url;
     MutualTools.instance.beginPlay(song);
   }
+
   /// 暂停
   pause() {
     MutualTools.instance.pause();
   }
+
   resume() {
     MutualTools.instance.resume();
   }
+
   /// 停止
   stop() {
     MutualTools.instance.stop();
   }
+
   /// seek
   seek(int value) {
     MutualTools.instance.seek(value);
   }
+
   /// 上一首
   preAction() {
-
-    if (this.mode == 1) { // 随机
+    if (this.mode == 1) {
+      // 随机
       this.currentPlayIndex = Random().nextInt(this.songArr.length - 1);
     } else {
       this.currentPlayIndex -= 1;
@@ -152,13 +160,15 @@ class PlayerTools {
     }
     this.play(songArr[currentPlayIndex]);
   }
+
   /// 下一首
-  nextAction([bool isAutoend = false]){
+  nextAction([bool isAutoend = false]) {
     if (isAutoend && this.mode == 2) {
       this.play(songArr[currentPlayIndex]);
       return;
     }
-    if (this.mode == 1) { // 随机
+    if (this.mode == 1) {
+      // 随机
       this.currentPlayIndex = Random().nextInt(this.songArr.length - 1);
     } else {
       this.currentPlayIndex += 1;
@@ -168,7 +178,6 @@ class PlayerTools {
     }
     this.play(songArr[currentPlayIndex]);
   }
-
 
   /// 定时器
   Timer _countdownTimer;
@@ -197,6 +206,7 @@ class PlayerTools {
       }
     });
   }
+
   /// 关闭定时器
   stopTimer() {
     if (_countdownTimer != null) {
@@ -204,3 +214,4 @@ class PlayerTools {
       _countdownTimer = null;
     }
   }
+}

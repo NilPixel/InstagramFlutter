@@ -27,7 +27,7 @@ class HttpUtil {
 class HeaderInterceptor extends Interceptor {
   @override
   Future onRequest(RequestOptions options) {
-    final token = AppConfig.userTools.getUserToken();
+    final token = '';
     if (token != null && token.length > 0) {
       options.headers
           .putIfAbsent("Authorization", () => "Bearer" + " " + token);

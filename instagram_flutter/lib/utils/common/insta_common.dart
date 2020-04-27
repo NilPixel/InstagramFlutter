@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +5,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 
 class CommonUtil {
   static padNum(String pad) {
@@ -30,7 +30,8 @@ class CommonUtil {
   }
 
   static isPassword(String password) {
-    return new RegExp(r'^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,12}$').hasMatch(password);
+    return new RegExp(r'^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,12}$')
+        .hasMatch(password);
   }
 
   static isEmail(String email) {
@@ -40,14 +41,12 @@ class CommonUtil {
   // 处理图片
   static Future<FormData> clickIcon(int count) async {
     FormData formData;
-    List<UploadFileInfo> files = [];
+    List<Future<MultipartFile>> files = [];
     try {
       List<Asset> resultList = await MultiImagePicker.pickImages(
-          maxImages: count,
-          enableCamera: true
-      );
+          maxImages: count, enableCamera: true);
       if (resultList.length > 0) {
-        for(int i = 0; i< resultList.length; i ++) {
+        for (int i = 0; i < resultList.length; i++) {
           Asset asset = resultList[i];
           ByteData byteData = await asset.requestThumbnail(200, 200);
           List<int> imageData = byteData.buffer.asUint8List();
@@ -57,20 +56,22 @@ class CommonUtil {
           //获得应用临时目录路径
           final Directory _directory = await getTemporaryDirectory();
           final Directory _imageDirectory =
-          await new Directory('${_directory.path}/image/')
-              .create(recursive: true);
+              await new Directory('${_directory.path}/image/')
+                  .create(recursive: true);
           var path = _imageDirectory.path;
           print('本次获得路径：${_imageDirectory.path}');
           //将压缩的图片暂时存入应用缓存目录
           File imageFile = new File('${path}originalImage_$uuid.png')
             ..writeAsBytesSync(imageData);
           print(imageFile.path);
-          var file = new UploadFileInfo(imageFile, '${path}originalImage_$uuid.png', contentType: ContentType.parse("image/png"));
+          // var file = new MultipartFile(imageFile, '${path}originalImage_$uuid.png', contentType: ContentType.parse("image/png"));
+          var file = MultipartFile.fromFile(imageFile.path,
+              filename: '${path}originalImage_$uuid.png',
+              contentType: MediaType.parse("image/png"));
           files.add(file);
-        };
-        FormData formData = new FormData.from({
-          'file': files
-        });
+        }
+        ;
+        FormData formData = new FormData.fromMap({'file': files});
         return formData;
       } else {
         return formData;

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:instagram_flutter/widget/dialog/insta_dialog.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'insta_stories.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'viewmodel/insta_home_provide.dart';
 
 class InstaHome extends StatefulWidget {
   InstaHome({Key key}) : super(key: key);
@@ -27,7 +31,50 @@ class _InstaHomeState extends State<InstaHome> {
     ],
   );
 
-  RefreshController _controller = RefreshController(initialRefresh: true);
+  final _subscriptions = CompositeSubscription();
+  final _loading = LoadingDialog();
+  final _cellHeight = 80.0;
+
+  bool get wantKeepAlive => true;
+  HomeProvide _provide = HomeProvide();
+
+  RefreshController _controller = RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // _loadData();
+    _provide.subjectMore.listen((hasMore) {
+      if (hasMore) {
+        _controller.refreshToIdle();
+      } else {
+        if (_provide.dataArr.length > 0) {
+          _controller.loadNoData();
+        }
+      }
+    });
+  }
+
+  _loadData([bool isRefresh = true]) {
+    var s = _provide
+        .getSongs(isRefresh)
+        .doOnListen(() {
+          setState(() {});
+          _controller.refreshCompleted();
+        })
+        .doOnCancel(() {})
+        .listen((data) {
+          if (isRefresh) {
+            setState(() {
+              _controller.refreshCompleted();
+            });
+          }
+        }, onError: (e) {
+          _controller.loadFailed();
+        });
+    _subscriptions.add(s);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +87,23 @@ class _InstaHomeState extends State<InstaHome> {
         enablePullDown: true,
         enablePullUp: true,
         header: WaterDropHeader(),
-        footer: ClassicFooter(
-          loadStyle: LoadStyle.ShowAlways,
-          completeDuration: Duration(microseconds: 50),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            Widget body;
+            if (mode == LoadStatus.idle) {
+              body = Text("pull up load");
+            } else if (mode == LoadStatus.loading) {
+              body = CupertinoActivityIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("Load Failed!Click retry!");
+            } else {
+              body = Text("No more Data");
+            }
+            return Container(
+              height: 55.0,
+              child: Center(child: body),
+            );
+          },
         ),
         onRefresh: _onRefresh,
         onLoading: _onLoading,
@@ -182,16 +243,14 @@ class _InstaHomeState extends State<InstaHome> {
   }
 
   void _onRefresh() async {
-    await Future.delayed(Duration(milliseconds: 1000));
-    setState(() {});
-    _controller.refreshCompleted();
+    _loadData();
+    // setState(() {});
+    // _controller.refreshCompleted();
   }
 
   void _onLoading() async {
-    await Future.delayed(Duration(milliseconds: 1500));
-    // if (mounted) {
-    setState(() {});
-    // }
-    _controller.loadComplete();
+    if (_provide.hasMore) {
+      _loadData(false);
+    }
   }
 }

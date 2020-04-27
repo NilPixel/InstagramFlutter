@@ -1,5 +1,4 @@
 import 'package:instagram_flutter/utils/network/insta_request_util.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:instagram_flutter/data/insta_base.dart';
 import 'package:instagram_flutter/base/insta_config.dart';
 
