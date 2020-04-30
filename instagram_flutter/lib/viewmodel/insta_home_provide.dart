@@ -57,11 +57,11 @@ class HomeProvide extends BaseProvide {
     isRefrsh ? page = 0 : page++;
     var query = {
       'page': this.page,
-      'pageSize': 30,
+      'pageSize': 10,
       'orderkey': 'imgUrl',
       'sequence': true,
       'searchKey': '',
-      'userId': null
+      'userId': AppConfig.userTools.getUserId()
     };
     return _repo
         .getSongs(query)

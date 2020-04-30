@@ -9,31 +9,34 @@ class UserTools {
   }
 
   static Future<UserTools> getInstance() async {
-    if (_instance == null) {}
-    _instance = new UserTools();
-    await _instance._init();
+    if (_instance == null) {
+      _instance = new UserTools();
+      await _instance._init();
+    }
+    return _instance;
   }
 
-  static SharedPreferences _spf;
   Future _init() async {
     _spf = await SharedPreferences.getInstance();
   }
 
-  static bool _beforeCheck() {
+  static SharedPreferences _spf;
+
+  static bool _beforCheck() {
     if (_spf == null) {
       return true;
     }
     return false;
   }
 
-// 存储用户数据
+  // 存储用户数据
   Future<bool> setUserData(Map<String, dynamic> user) {
-    if (_beforeCheck()) return null;
+    if (_beforCheck()) return null;
     var jsonStr = json.encode(user);
     return _spf.setString(ConstConfig.CURRENT_USERDATA, jsonStr);
   }
 
-// 获取数据
+  // 获取数据
   dynamic getUserData() {
     var mapStr = _spf.getString(ConstConfig.CURRENT_USERDATA);
     if (mapStr != null) {

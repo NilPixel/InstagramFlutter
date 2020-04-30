@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:instagram_flutter/widget/dialog/insta_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rxdart/rxdart.dart';
+import 'base/insta_config.dart';
 import 'insta_stories.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'viewmodel/insta_home_provide.dart';
+import 'utils/common/insta_adapt.dart';
 
 class InstaHome extends StatefulWidget {
   InstaHome({Key key}) : super(key: key);
@@ -44,7 +47,7 @@ class _InstaHomeState extends State<InstaHome> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _loadData();
+    _loadData();
     _provide.subjectMore.listen((hasMore) {
       if (hasMore) {
         _controller.refreshToIdle();
@@ -57,32 +60,49 @@ class _InstaHomeState extends State<InstaHome> {
   }
 
   _loadData([bool isRefresh = true]) {
-    var s = _provide
-        .getSongs(isRefresh)
-        .doOnListen(() {
-          setState(() {});
-          _controller.refreshCompleted();
-        })
-        .doOnCancel(() {})
-        .listen((data) {
-          if (isRefresh) {
-            setState(() {
-              _controller.refreshCompleted();
-            });
-          }
-        }, onError: (e) {
-          _controller.loadFailed();
-        });
+    var s = _provide.getSongs(isRefresh).listen((data) {
+      if (isRefresh) {
+        _controller.refreshCompleted();
+        _controller.resetNoData();
+      } else {
+        _controller.loadComplete();
+      }
+    }, onError: (e) {
+      if (isRefresh) {
+        _controller.refreshFailed();
+      } else {
+        _controller.loadFailed();
+      }
+    });
     _subscriptions.add(s);
   }
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: _provide,
+      child: Scaffold(
+        appBar: topBar,
+        body: _initView(),
+      ),
+    );
+  }
+
+  Widget _initView() {
+    return Consumer<HomeProvide>(
+      builder: (build, provide, _) {
+        print('Consumer-initView');
+        return _provide.dataArr.length > 0
+            ? _buildListView()
+            : AppConfig.initLoading(false);
+      },
+    );
+  }
+
+  Widget _buildListView() {
     var deviceSize = MediaQuery.of(context).size;
 
-    return new Scaffold(
-      appBar: topBar,
-      body: SmartRefresher(
+    return SmartRefresher(
         controller: _controller,
         enablePullDown: true,
         enablePullUp: true,
@@ -108,11 +128,11 @@ class _InstaHomeState extends State<InstaHome> {
         onRefresh: _onRefresh,
         onLoading: _onLoading,
         child: ListView.builder(
-          itemCount: 5,
+          itemCount: _provide.dataArr.length + 1,
           itemBuilder: (context, index) => index == 0
               ? new SizedBox(
                   child: new InstaStories(),
-                  height: deviceSize.height * 0.15,
+                  height: Adapt.px(245),
                 )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -131,11 +151,11 @@ class _InstaHomeState extends State<InstaHome> {
                                   width: 40.0,
                                   height: 40.0,
                                   imageUrl:
-                                      "http://n.sinaimg.cn/tech/crawl/0/w400h400/20200422/de9a-isqivxf9857884.jpg",
+                                      _provide.dataArr[index - 1].imgUrl,
                                   placeholder: (context, url) =>
                                       CircularProgressIndicator(),
                                   errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
+                                      Icon(Icons.error_outline),
                                 ),
                               ),
                               new SizedBox(
@@ -159,10 +179,10 @@ class _InstaHomeState extends State<InstaHome> {
                       child: new CachedNetworkImage(
                         fit: BoxFit.cover,
                         imageUrl:
-                            "https://images.pexels.com/photos/672657/pexels-photo-672657.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                            _provide.dataArr[index - 1].imgUrl,
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        errorWidget: (context, url, error) => Image.asset("assets/images/insta_default.png"),
                       ),
                     ),
                     Padding(
@@ -195,7 +215,7 @@ class _InstaHomeState extends State<InstaHome> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        "Liked by pawankumar, pk and 528,331 others",
+                        _provide.dataArr[index - 1].title,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -214,7 +234,7 @@ class _InstaHomeState extends State<InstaHome> {
                                 placeholder: (context, url) =>
                                     CircularProgressIndicator(),
                                 errorWidget: (context, url, error) =>
-                                    Icon(Icons.error)),
+                                    Icon(Icons.error_outline)),
                           ),
                           new SizedBox(
                             width: 10.0,
@@ -232,25 +252,28 @@ class _InstaHomeState extends State<InstaHome> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text("1 Day Ago",
+                      child: Text(_provide.dataArr[index - 1].singer,
                           style: TextStyle(color: Colors.grey)),
                     )
                   ],
                 ),
-        ),
-      ),
-    );
+        ));
   }
 
   void _onRefresh() async {
     _loadData();
-    // setState(() {});
-    // _controller.refreshCompleted();
   }
 
   void _onLoading() async {
     if (_provide.hasMore) {
       _loadData(false);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("首页释放");
+    _subscriptions.dispose();
   }
 }
