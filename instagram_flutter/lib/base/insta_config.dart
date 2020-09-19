@@ -18,7 +18,7 @@ class AppConfig {
   static const platform =
       const MethodChannel('darren.com.example.flutterFlowermusic/mutual');
 
-  /// Construct a color from a hex code string, of the format #RRGGBB.
+  /// Construct a color from a hex code string, of the 456
   static Color hexToColor(String code) {
     return new Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
   }

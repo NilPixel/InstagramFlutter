@@ -7,7 +7,7 @@ Future<T> _showAlert<T>({BuildContext context, Widget child}) => showDialog<T>(
       builder: (BuildContext context) => child,
     );
 /**
- * onlyPositive  : 只有确定按钮
+ * onlyPositive  : 只有确定按钮...
  */
 Future<bool> showAlert(BuildContext context,
         {String title,
